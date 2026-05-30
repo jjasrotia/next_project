@@ -10,7 +10,7 @@ export async function POST(request: Request) {
         const { username, email, password } = await request.json()
         const existingUserVerifiedByUserName = await UserModel.findOne({
             username,
-            isVerfified: true
+            isVerified: true
         })
         if (existingUserVerifiedByUserName) {
             return Response.json({
@@ -29,18 +29,17 @@ export async function POST(request: Request) {
         const verifyCode = Math.floor(100000 + Math.random() * 900000).toString()
 
         if (existingUserByEmail) {
-            if(existingUserByEmail.isVerified)
-            {
-                    return Response.json({
-                        success:false,
-                        message:"User already exist with this email"
-                    },{status:400})
+            if (existingUserByEmail.isVerified) {
+                return Response.json({
+                    success: false,
+                    message: "User already exist with this email"
+                }, { status: 400 })
             }
-            else{
-                const hashedPassword = await bcrypt.hash(password,10)
+            else {
+                const hashedPassword = await bcrypt.hash(password, 10)
                 existingUserByEmail.password = hashedPassword;
                 existingUserByEmail.verifyCode = verifyCode;
-                existingUserByEmail.verifyCodeExpiry = new Date(Date.now()+3600000)
+                existingUserByEmail.verifyCodeExpiry = new Date(Date.now() + 3600000)
                 await existingUserByEmail.save()
             }
         } else {
@@ -50,7 +49,7 @@ export async function POST(request: Request) {
             const newUser = new UserModel({
                 username,
                 email,
-                password:hashedPassword,
+                password: hashedPassword,
                 verifyCode,
                 verifyCodeExpiry: expiryDate,
                 isVerified: false,
@@ -61,12 +60,13 @@ export async function POST(request: Request) {
         }
 
         //send verification email
-
+        console.log("Before email sending")
         const emailResponse = await sendVerificationEmail(
             email,
             username,
             verifyCode
         )
+        console.log("Before email sending")
         if (!emailResponse.success) {
             return Response.json({
                 success: false,

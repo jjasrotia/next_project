@@ -2,6 +2,6 @@ import {z} from "zod"
 
 
 export const signInSchema= z.object({
-    identifierL:z.string(),
+    identifier:z.string(),
     password:z.string()
 })
